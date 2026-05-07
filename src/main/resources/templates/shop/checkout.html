@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Checkout — Elevate Luxe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<div class="page-hero-sm">
+    <div class="container">
+        <h1 class="page-hero-title">Checkout</h1>
+    </div>
+</div>
+
+<div class="container section-padding">
+    <div th:if="${errorMsg}" class="alert alert-danger mb-4" th:text="${errorMsg}"></div>
+
+    <div class="row g-5">
+        <!-- Shipping Form -->
+        <div class="col-lg-7">
+            <div class="checkout-card">
+                <h5 class="checkout-section-title"><i class="fas fa-map-marker-alt me-2"></i>Shipping Address</h5>
+                <form th:action="@{/checkout/place}" method="post" id="checkoutForm">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Street Address *</label>
+                            <input type="text" class="form-control luxury-input" name="address"
+                                   th:value="${user.address}" placeholder="123 Main Street" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">City *</label>
+                            <input type="text" class="form-control luxury-input" name="city"
+                                   th:value="${user.city}" placeholder="City" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Postal Code *</label>
+                            <input type="text" class="form-control luxury-input" name="postalCode"
+                                   th:value="${user.postalCode}" placeholder="00000" required/>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Country *</label>
+                            <input type="text" class="form-control luxury-input" name="country"
+                                   th:value="${user.country}" placeholder="Country" required/>
+                        </div>
+                    </div>
+
+                    <h5 class="checkout-section-title mt-4"><i class="fas fa-credit-card me-2"></i>Payment</h5>
+                    <div class="payment-demo-note">
+                        <i class="fas fa-info-circle me-2"></i>This is a demo store — no real payment is processed.
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-12">
+                            <input type="text" class="form-control luxury-input" placeholder="4242 4242 4242 4242" disabled/>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control luxury-input" placeholder="MM/YY" disabled/>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control luxury-input" placeholder="CVV" disabled/>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-luxury btn-lg w-100 mt-4">
+                        <i class="fas fa-lock me-2"></i>Place Order
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-5">
+            <div class="order-summary-card">
+                <h5 class="summary-title">Order Summary</h5>
+                <div class="checkout-items">
+                    <div class="checkout-item" th:each="item : ${cartItems}">
+                        <div class="checkout-item-img">
+                            <img th:src="${item.imageUrl != null ? item.imageUrl : '/images/placeholder.jpg'}" th:alt="${item.productName}"/>
+                            <span class="checkout-item-qty" th:text="${item.quantity}">1</span>
+                        </div>
+                        <div class="checkout-item-name" th:text="${item.productName}">Product</div>
+                        <div class="checkout-item-price">€<span th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}">0.00</span></div>
+                    </div>
+                </div>
+                <div class="summary-divider mt-3"></div>
+                <div class="summary-line"><span>Subtotal</span><span>€<span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span></div>
+                <div class="summary-line"><span>Shipping</span><span th:text="${cartTotal.doubleValue() >= 80 ? 'Free' : '€5.99'}">€5.99</span></div>
+                <div class="summary-divider"></div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span>€<span th:text="${#numbers.formatDecimal(cartTotal, 1, 2)}">0.00</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

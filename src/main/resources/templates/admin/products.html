@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Products — Admin — Elevate Luxe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+</head>
+<body class="admin-body">
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+<div class="admin-main">
+    <div th:replace="~{fragments/admin-sidebar :: topbar('Products')}"></div>
+    <div class="admin-content">
+        <div th:if="${successMsg}" class="alert alert-success alert-dismissible fade show" th:text="${successMsg}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMsg}" class="alert alert-danger alert-dismissible fade show" th:text="${errorMsg}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5>All Products (<span th:text="${products != null ? products.size() : 0}">0</span>)</h5>
+                <a th:href="@{/admin/products/new}" class="btn btn-luxury btn-sm">
+                    <i class="fas fa-plus me-1"></i> Add Product
+                </a>
+            </div>
+
+            <!-- Search/filter bar -->
+            <div class="mb-3">
+                <input type="text" id="productSearch" class="form-control luxury-input"
+                       placeholder="Search products by name or brand..." oninput="filterTable()"/>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table luxury-table" id="productsTable">
+                    <thead>
+                        <tr>
+                            <th style="width:60px"></th>
+                            <th>Name</th>
+                            <th>Brand</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Featured</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${products}">
+                            <td>
+                                <img th:src="${p.imageUrl != null ? p.imageUrl : '/images/placeholder.jpg'}"
+                                     th:alt="${p.name}" class="admin-thumb"/>
+                            </td>
+                            <td class="fw-medium" th:text="${p.name}">Product</td>
+                            <td th:text="${p.brand}">Brand</td>
+                            <td th:text="${p.category?.name}">Category</td>
+                            <td>€<span th:text="${#numbers.formatDecimal(p.price,1,2)}">0.00</span></td>
+                            <td>
+                                <span th:classappend="${p.stockQuantity <= 5 ? 'text-warning fw-bold' : ''}" th:text="${p.stockQuantity}">0</span>
+                            </td>
+                            <td>
+                                <i class="fas fa-star" th:if="${p.featured}" style="color: var(--gold)"></i>
+                                <i class="fas fa-star" th:unless="${p.featured}" style="color: #ddd"></i>
+                            </td>
+                            <td>
+                                <span th:if="${p.active}" class="badge bg-success">Active</span>
+                                <span th:unless="${p.active}" class="badge bg-secondary">Inactive</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-sm btn-luxury-outline">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <!-- Quick stock update -->
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="openStockModal([[${p.id}]], [[${p.stockQuantity}]], [[${p.name}]])"
+                                            th:attr="data-id=${p.id},data-qty=${p.stockQuantity},data-name=${p.name}">
+                                        <i class="fas fa-warehouse"></i>
+                                    </button>
+                                    <form th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post"
+                                          onsubmit="return confirm('Deactivate this product?')">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${products == null or products.isEmpty()}">
+                            <td colspan="9" class="text-center text-muted py-3">No products found</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stock Modal -->
+<div class="modal fade" id="stockModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content luxury-modal">
+            <div class="modal-header">
+                <h6 class="modal-title">Update Stock</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="stockForm" method="post">
+                <div class="modal-body">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <label class="form-label" id="stockProductName">Product</label>
+                    <input type="number" class="form-control luxury-input" name="quantity" id="stockQtyInput" min="0" required/>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-luxury btn-sm">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/admin.js}"></script>
+<script th:inline="javascript">
+function openStockModal(id, qty, name) {
+    document.getElementById('stockForm').action = '/admin/products/stock/' + id;
+    document.getElementById('stockQtyInput').value = qty;
+    document.getElementById('stockProductName').textContent = name;
+    new bootstrap.Modal(document.getElementById('stockModal')).show();
+}
+function filterTable() {
+    const q = document.getElementById('productSearch').value.toLowerCase();
+    document.querySelectorAll('#productsTable tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+
+  mysql:
+    image: mysql:8.2
+    container_name: elevateluxe-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-elevateluxe}
+      MYSQL_USER: ${DB_USER:-luxeuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-luxepass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - elevateluxe-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elevateluxe-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-elevateluxe}
+      DB_USER: ${DB_USER:-luxeuser}
+      DB_PASSWORD: ${DB_PASSWORD:-luxepass}
+      UPLOAD_DIR: /app/uploads
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - elevateluxe-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  elevateluxe-net:
+    driver: bridge

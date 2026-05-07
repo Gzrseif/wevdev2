@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- SIDEBAR -->
+<aside class="admin-sidebar" th:fragment="sidebar">
+    <div class="admin-logo">
+        <a th:href="@{/admin}">✦ Elevate Luxe</a>
+        <div class="admin-badge">Admin</div>
+    </div>
+    <nav class="admin-nav">
+        <div class="nav-section-label">Main</div>
+        <a th:href="@{/admin}" class="admin-nav-link"
+           th:classappend="${currentPage == 'dashboard'} ? 'active' : ''">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </a>
+        <div class="nav-section-label">Catalog</div>
+        <a th:href="@{/admin/products}" class="admin-nav-link"
+           th:classappend="${currentPage == 'products'} ? 'active' : ''">
+            <i class="fas fa-box"></i> Products
+        </a>
+        <div class="nav-section-label">Commerce</div>
+        <a th:href="@{/admin/orders}" class="admin-nav-link"
+           th:classappend="${currentPage == 'orders'} ? 'active' : ''">
+            <i class="fas fa-shopping-bag"></i> Orders
+        </a>
+        <a th:href="@{/admin/users}" class="admin-nav-link"
+           th:classappend="${currentPage == 'users'} ? 'active' : ''">
+            <i class="fas fa-users"></i> Users
+        </a>
+        <div class="nav-section-label">Store</div>
+        <a th:href="@{/}" class="admin-nav-link" target="_blank">
+            <i class="fas fa-store"></i> View Store
+        </a>
+    </nav>
+    <div class="admin-sidebar-footer">
+        <form th:action="@{/auth/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button class="admin-nav-link w-100 text-start border-0 bg-transparent" type="submit">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+        </form>
+    </div>
+</aside>
+
+<!-- TOPBAR -->
+<div class="admin-topbar" th:fragment="topbar(title)">
+    <div class="topbar-left">
+        <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <h4 class="topbar-title" th:text="${title}">Dashboard</h4>
+    </div>
+    <div class="topbar-right d-flex align-items-center gap-3">
+        <a th:href="@{/}" class="btn btn-sm btn-luxury-outline"><i class="fas fa-external-link-alt me-1"></i>View Store</a>
+        <div class="topbar-user" sec:authorize="isAuthenticated()">
+            <i class="fas fa-user-circle fa-lg"></i>
+            <span sec:authentication="name">Admin</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

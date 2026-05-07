@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Admin Dashboard — Elevate Luxe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+</head>
+<body class="admin-body">
+<div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+<div class="admin-main">
+    <div th:replace="~{fragments/admin-sidebar :: topbar('Dashboard')}"></div>
+
+    <div class="admin-content">
+        <!-- Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-gold"><i class="fas fa-box"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${totalProducts}">0</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-blue"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${totalUsers}">0</div>
+                        <div class="stat-label">Registered Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-green"><i class="fas fa-shopping-bag"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${totalOrders}">0</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple"><i class="fas fa-star"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${featuredProducts != null ? featuredProducts.size() : 0}">0</div>
+                        <div class="stat-label">Featured Items</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <h5>Recent Orders</h5>
+                <a th:href="@{/admin/orders}" class="btn btn-sm btn-luxury-outline">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table luxury-table mb-0">
+                    <thead>
+                        <tr><th>Order #</th><th>Customer</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${recentOrders}">
+                            <td class="fw-medium" th:text="${order.orderNumber}">EL-001</td>
+                            <td th:text="${order.user.fullName}">Customer</td>
+                            <td th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy')}">01 Jan 2025</td>
+                            <td><span class="status-badge" th:classappend="${'status-' + order.status.name().toLowerCase()}" th:text="${order.status}">PENDING</span></td>
+                            <td>€<span th:text="${#numbers.formatDecimal(order.totalAmount,1,2)}">0.00</span></td>
+                            <td><a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-luxury-outline">View</a></td>
+                        </tr>
+                        <tr th:if="${recentOrders == null or recentOrders.isEmpty()}">
+                            <td colspan="6" class="text-center text-muted py-3">No orders yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Featured Products -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5>Featured Products</h5>
+                <a th:href="@{/admin/products}" class="btn btn-sm btn-luxury-outline">Manage</a>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-lg-3" th:each="p : ${featuredProducts}">
+                    <div class="admin-product-mini">
+                        <img th:src="${p.imageUrl != null ? p.imageUrl : '/images/placeholder.jpg'}" th:alt="${p.name}"/>
+                        <div class="admin-product-mini-name" th:text="${p.name}">Product</div>
+                        <div class="admin-product-mini-price">€<span th:text="${#numbers.formatDecimal(p.price,1,2)}">0.00</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>
