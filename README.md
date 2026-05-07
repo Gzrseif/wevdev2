@@ -101,7 +101,7 @@ src/main/java/com/elevateluxe/
 ├── controller/      # Auth, Shop, Cart, Checkout, Orders, Profile, Admin
 ├── dto/             # RegisterDto, ProductDto, ProfileDto
 ├── entity/          # User, Role, Product, Category, Order, OrderItem, CartItem
-├── repository/      # JPA repositories
+├── repository/      # JPA repositories within the project
 └── service/         # UserService, ProductService, OrderService, CartService, FileStorageService
 
 src/main/resources/
