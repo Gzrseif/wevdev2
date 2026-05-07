@@ -25,11 +25,11 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (roleRepository.count() > 0) return;
 
-        // Roles
+
         Role adminRole = roleRepository.save(new Role("ROLE_ADMIN"));
         Role userRole = roleRepository.save(new Role("ROLE_USER"));
 
-        // Admin user
+        //Admin user
         User admin = new User();
         admin.setEmail("admin@elevateluxe.com");
         admin.setPassword(passwordEncoder.encode("admin123"));
