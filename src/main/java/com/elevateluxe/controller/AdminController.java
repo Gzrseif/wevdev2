@@ -36,7 +36,6 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    // === Products ===
     @GetMapping("/products")
     public String products(Model model) {
         model.addAttribute("currentPage", "products");
@@ -111,7 +110,6 @@ public class AdminController {
         return "redirect:/admin/products";
     }
 
-    // === Orders ===
     @GetMapping("/orders")
     public String orders(Model model) {
         model.addAttribute("currentPage", "orders");
